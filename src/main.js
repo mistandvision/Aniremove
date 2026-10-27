@@ -1,30 +1,55 @@
-// Function: AI Background Removal using in-browser WebAssembly/GPU
-async function removeBackgroundAI(imageSource) {
-  const statusText = document.getElementById('status-text'); // aapke UI ka status element
-  if (statusText) statusText.innerText = "AI processing image... Please wait.";
+// Base64 helper
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = error => reject(error);
+  });
+}
+
+// Main AI processing function (Calls Vercel API with HF_TOKEN)
+async function processWithHuggingFace(file) {
+  const statusText = document.getElementById('status-text');
+  if (statusText) statusText.innerText = "Uploading to AI server... Please wait.";
 
   try {
-    // Ye direct browser ke andar AI model chala kar background remove karega
-    const blob = await window.imglyRemoveBackground(imageSource, {
-      progress: (key, current, total) => {
-        const percent = Math.round((current / total) * 100);
-        if (statusText) statusText.innerText = `Loading AI Engine: ${percent}%`;
-      }
+    const base64Data = await fileToBase64(file);
+
+    const res = await fetch('/api/remove', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: base64Data })
     });
 
-    // Output transparent PNG image ka URL
-    const resultUrl = URL.createObjectURL(blob);
-    
-    // Result image preview me dikhana
-    const previewImg = document.getElementById('output-image'); // aapke UI ka preview ID
-    if (previewImg) {
-      previewImg.src = resultUrl;
+    if (!res.ok) {
+      throw new Error(`AI processing failed with status ${res.status}`);
     }
-    
+
+    const blob = await res.blob();
+    const resultUrl = URL.createObjectURL(blob);
+
+    // Update image preview if present
+    const previewImg = document.getElementById('output-image');
+    if (previewImg) previewImg.src = resultUrl;
+
     if (statusText) statusText.innerText = "Background successfully removed!";
     return resultUrl;
-  } catch (error) {
-    console.error("AI Removal Error:", error);
-    if (statusText) statusText.innerText = "Error removing background. Try another image.";
+  } catch (err) {
+    console.error("AI Error:", err);
+    if (statusText) statusText.innerText = "Processing error. Please try again.";
   }
 }
+
+// Auto wire file upload inputs on page load
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  fileInputs.forEach(input => {
+    input.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        processWithHuggingFace(file);
+      }
+    });
+  });
+});
