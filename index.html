@@ -1,134 +1,15 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090d18">
-  <title>BGRemover AI — Image & Video Studio</title>
-  <link rel="stylesheet" href="/src/style.css">
-</head>
-<body>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#"><span class="brand-icon">BG</span><span>BGRemover <b>AI</b></span></a>
-      <span class="local-tag"><i></i> Cloud AI Processing</span>
-    </header>
-    
-    <main>
-      <section class="hero">
-        <div class="eyebrow">✦ CREATOR TOOLKIT</div>
-        <h1>Keep what matters.<br><span>Remove the background.</span></h1>
-        <p>Remove backgrounds from images and videos, keep your subject intact, and replace the scene with a color or image.</p>
-      </section>
-
-      <nav class="tabs" aria-label="Choose media type">
-        <button class="tab active" data-mode="image">▧ <span>Image remover</span></button>
-        <button class="tab" data-mode="video">▶ <span>Video remover</span></button>
-      </nav>
-
-      <section class="workspace">
-        <aside class="panel controls">
-          <div class="step-title">
-            <span>01</span>
-            <div>
-              <h2 id="uploadHeading">Upload image</h2>
-              <p id="uploadSub">PNG, JPG, WEBP</p>
-            </div>
-          </div>
-          
-          <label class="dropzone" id="dropzone" for="fileInput">
-            <span class="upload-symbol">↑</span>
-            <strong>Choose a file</strong>
-            <span>or drag and drop it here</span>
-            <small id="fileName">No file selected</small>
-          </label>
-          <input id="fileInput" type="file" accept="image/*" hidden>
-
-          <div class="step-title second">
-            <span>02</span>
-            <div>
-              <h2>Background</h2>
-              <p>Transparent, color or image</p>
-            </div>
-          </div>
-          
-          <div class="bg-modes">
-            <button class="bg-mode active" data-bgmode="transparent">Transparent</button>
-            <button class="bg-mode" data-bgmode="color">Solid color</button>
-            <button class="bg-mode" data-bgmode="image">Image</button>
-          </div>
-
-          <div id="colorPanel" class="color-panel hidden">
-            <label for="colorInput">Background color</label>
-            <input id="colorInput" type="color" value="#e8edf5">
-          </div>
-          
-          <div id="imagePanel" class="image-panel hidden">
-            <label class="small-upload" for="bgInput">＋ Upload background image</label>
-            <input id="bgInput" type="file" accept="image/*" hidden>
-            <small id="bgFileName">No background image selected</small>
-          </div>
-
-          <div class="swatches">
-            <button data-color="#e8edf5" style="--c:#e8edf5" aria-label="Light grey"></button>
-            <button data-color="#ffffff" style="--c:#ffffff" aria-label="White"></button>
-            <button data-color="#111827" style="--c:#111827" aria-label="Dark"></button>
-            <button data-color="#dbeafe" style="--c:#dbeafe" aria-label="Blue"></button>
-            <button data-color="#dcfce7" style="--c:#dcfce7" aria-label="Green"></button>
-          </div>
-
-          <div class="rule"></div>
-
-          <div class="step-title">
-            <span>03</span>
-            <div>
-              <h2>Remove background</h2>
-              <p id="engineSub">AI foreground extraction</p>
-            </div>
-          </div>
-
-          <div class="status">
-            <i id="statusDot"></i>
-            <div>
-              <strong id="statusTitle">Ready to start</strong>
-              <p id="statusText">Upload an image or video.</p>
-            </div>
-          </div>
-
-          <button class="primary" id="removeBtn" disabled>✦ Remove background</button>
-          <button class="secondary" id="resetBtn">Reset workspace</button>
-          <p class="privacy-note">Powered by ultra-fast AI serverless processing.</p>
-        </aside>
-
-        <section class="preview-area">
-          <div class="preview-head">
-            <div>
-              <small>WORKSPACE PREVIEW</small>
-              <h2 id="previewTitle">Your image</h2>
-            </div>
-            <span class="pill" id="previewStatus">Waiting for file</span>
-          </div>
-
-          <div class="preview-frame checker" id="previewFrame">
-            <div class="empty-state" id="emptyState">
-              <div class="empty-icon">✦</div>
-              <h3>Your subject will appear here</h3>
-              <p>Upload an image or video to begin.</p>
-            </div>
-            <img id="imagePreview" alt="Processed image preview">
-            <video id="videoPreview" playsinline muted></video>
-            <canvas id="videoCanvas"></canvas>
-          </div>
-
-          <div class="selection-tools hidden" id="selectionTools">
-            <strong>Click to Preserve</strong>
-            <span id="selectionHint">Play or pause the video, then click the person or object you want to keep.</span>
-            <button id="clearSelection" type="button">Clear selection</button>
-          </div>
-
-          <div class="preview-toolbar">
-            <div class="file-meta" id="mediaMeta">No media loaded</div>
-            <div class="toolbar-actions">
-              <button id="playBtn" disabled>▶ Play</button>
-              <button id="downloadBtn" disabled>↓ Download result</button>
-            </div>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d18"><title>BGRemover AI — Image & Video Studio</title></head>
+<body><div class="app-shell">
+<header class="topbar"><a class="brand" href="#"><span class="brand-icon">BG</span><span>BGRemover <b>AI</b></span></a><span class="local-tag"><i></i> Private browser processing</span></header>
+<main><section class="hero"><div class="eyebrow">✦ CREATOR TOOLKIT</div><h1>Keep what matters.<br><span>Remove the background.</span></h1><p>Remove backgrounds from images and videos, keep your subject intact, and replace the scene with a color or image.</p></section>
+<nav class="tabs" aria-label="Choose media type"><button class="tab active" data-mode="image">▧ <span>Image remover</span></button><button class="tab" data-mode="video">▶ <span>Video remover</span></button></nav>
+<section class="workspace"><aside class="panel controls"><div class="step-title"><span>01</span><div><h2 id="uploadHeading">Upload image</h2><p id="uploadSub">PNG, JPG, WEBP</p></div></div>
+<label class="dropzone" id="dropzone" for="fileInput"><span class="upload-symbol">↑</span><strong>Choose a file</strong><span>or drag and drop it here</span><small id="fileName">No file selected</small></label><input id="fileInput" type="file" accept="image/*" hidden>
+<div class="step-title second"><span>02</span><div><h2>Background</h2><p>Transparent, color or image</p></div></div><div class="bg-modes"><button class="bg-mode active" data-bgmode="transparent">Transparent</button><button class="bg-mode" data-bgmode="color">Solid color</button><button class="bg-mode" data-bgmode="image">Image</button></div>
+<div id="colorPanel" class="color-panel hidden"><label for="colorInput">Background color</label><input id="colorInput" type="color" value="#e8edf5"></div><div id="imagePanel" class="image-panel hidden"><label class="small-upload" for="bgInput">＋ Upload background image</label><input id="bgInput" type="file" accept="image/*" hidden><small id="bgFileName">No background image selected</small></div>
+<div class="swatches"><button data-color="#e8edf5" style="--c:#e8edf5" aria-label="Light grey"></button><button data-color="#ffffff" style="--c:#ffffff" aria-label="White"></button><button data-color="#111827" style="--c:#111827" aria-label="Dark"></button><button data-color="#dbeafe" style="--c:#dbeafe" aria-label="Blue"></button><button data-color="#dcfce7" style="--c:#dcfce7" aria-label="Green"></button></div>
+<div class="rule"></div><div class="step-title"><span>03</span><div><h2>Remove background</h2><p id="engineSub">AI foreground extraction</p></div></div><div class="status"><i id="statusDot"></i><div><strong id="statusTitle">Ready to start</strong><p id="statusText">Upload an image or video.</p></div></div><button class="primary" id="removeBtn" disabled>✦ Remove background</button><button class="secondary" id="resetBtn">Reset workspace</button><p class="privacy-note">Your files are processed in your browser. The first use downloads AI models.</p></aside>
+<section class="preview-area"><div class="preview-head"><div><small>WORKSPACE PREVIEW</small><h2 id="previewTitle">Your image</h2></div><span class="pill" id="previewStatus">Waiting for file</span></div><div class="preview-frame checker" id="previewFrame"><div class="empty-state" id="emptyState"><div class="empty-icon">✦</div><h3>Your subject will appear here</h3><p>Upload an image or video to begin.</p></div><img id="imagePreview" alt="Processed image preview"><video id="videoPreview" playsinline muted></video><canvas id="videoCanvas"></canvas></div>
+<div class="selection-tools hidden" id="selectionTools"><strong>Click to Preserve</strong><span id="selectionHint">Play or pause the video, then click the person or object you want to keep.</span><button id="clearSelection" type="button">Clear selection</button></div><div class="preview-toolbar"><div class="file-meta" id="mediaMeta">No media loaded</div><div class="toolbar-actions"><button id="playBtn" disabled>▶ Play</button><button id="downloadBtn" disabled>↓ Download result</button></div></div><div class="progress-wrap hidden" id="progressWrap"><div class="progress-label"><span id="progressText">Preparing AI…</span><span id="progressPct">0%</span></div><div class="progress-track"><div id="progressBar"></div></div></div><div class="tip"><span>✦</span><p><b>Keep the subject.</b> This tool masks the background, not the foreground. Video mode lets you click a person or object to preserve it. Results depend on the scene and AI mask quality; refine selection if needed.</p></div></section></section>
+<footer><span>BGRemover AI</span><span>Image + video background studio</span></footer></main><div id="toast" class="toast" role="status"></div></div><script type="module" src="/src/main.js"></script></body></html>
