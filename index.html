@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090d18">
   <title>BGRemover AI — Image & Video Studio</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="app-shell">
@@ -131,31 +132,3 @@
               <button id="playBtn" disabled>▶ Play</button>
               <button id="downloadBtn" disabled>↓ Download result</button>
             </div>
-          </div>
-
-          <div class="progress-wrap hidden" id="progressWrap">
-            <div class="progress-label">
-              <span id="progressText">Preparing AI…</span>
-              <span id="progressPct">0%</span>
-            </div>
-            <div class="progress-track"><div id="progressBar"></div></div>
-          </div>
-
-          <div class="tip">
-            <span>✦</span>
-            <p><b>Keep the subject.</b> This tool masks the background cleanly using state-of-the-art vision models.</p>
-          </div>
-        </section>
-      </section>
-
-      <footer>
-        <span>BGRemover AI</span>
-        <span>Image + video background studio</span>
-      </footer>
-    </main>
-    <div id="toast" class="toast" role="status"></div>
-  </div>
-
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
