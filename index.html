@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d18"><title>BGRemover AI — Image & Video Studio</title></head>
+<html lang="en"><<!-- In-browser AI Background Removal Engine -->
+<script type="module">
+  import imglyRemoveBackground from "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.7/+esm";
+  window.imglyRemoveBackground = imglyRemoveBackground;
+</script>><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d18"><title>BGRemover AI — Image & Video Studio</title></head>
 <body><div class="app-shell">
 <header class="topbar"><a class="brand" href="#"><span class="brand-icon">BG</span><span>BGRemover <b>AI</b></span></a><span class="local-tag"><i></i> Private browser processing</span></header>
 <main><section class="hero"><div class="eyebrow">✦ CREATOR TOOLKIT</div><h1>Keep what matters.<br><span>Remove the background.</span></h1><p>Remove backgrounds from images and videos, keep your subject intact, and replace the scene with a color or image.</p></section>
