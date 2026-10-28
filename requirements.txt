@@ -1,0 +1,14 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+requests
+numpy<2
+opencv-python-headless
+torch==2.4.1
+torchvision==0.19.1
+transformers==4.44.2
+timm
+einops
+kornia
+huggingface_hub
+git+https://github.com/facebookresearch/sam2.git

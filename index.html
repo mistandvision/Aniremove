@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ANIREMOVE - Free AI Background Remover</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#060c24;--panel:#0b1535;--line:#1b2a5a;--text:#eef2ff;--mute:#8fa0d0;--blue:#1e90ff;--violet:#8b5cf6;--ok:#22c993;--bad:#ff5d73}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 500px at 70% -10%,#10205a 0,transparent 60%),var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",system-ui,sans-serif;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--line)}
+.logo{font-size:22px;font-weight:800;letter-spacing:.3px}.logo span{background:linear-gradient(90deg,var(--blue),var(--violet));-webkit-background-clip:text;color:transparent}
+#userbox{display:flex;gap:12px;align-items:center;color:var(--mute);font-size:13px}
+.btn{border:0;border-radius:12px;padding:12px 22px;font-weight:600;cursor:pointer;background:linear-gradient(90deg,var(--blue),var(--violet));color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+main{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:22px;padding:26px 28px;max-width:1300px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:18px}}
+h1{margin:0 0 6px;font-size:clamp(26px,4vw,38px)}
+.sub{color:var(--mute);margin:0 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.modes{display:inline-flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:16px}
+.modes button{border:0;background:transparent;padding:10px 26px;border-radius:10px;cursor:pointer;color:var(--mute);font-weight:600}
+.modes button.on{background:linear-gradient(90deg,var(--blue),var(--violet));color:#fff}
+#drop{border:2px dashed #2a4cc0;border-radius:14px;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;cursor:pointer;padding:20px}
+#drop.over{background:#0f1d4d}
+#drop small{color:var(--mute)}
+#work{display:none}
+.tabs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.tab{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 16px;cursor:pointer;color:var(--mute)}
+.tab.on{border-color:var(--blue);color:#fff;background:#0f2a66}
+.stage{position:relative;border-radius:12px;overflow:hidden;background:#000;display:flex;justify-content:center;align-items:center;min-height:260px;max-height:62vh}
+.stage.checker{background:conic-gradient(#d9dde8 25%,#fff 0 50%,#d9dde8 0 75%,#fff 0) 0 0/20px 20px}
+.stage img,.stage video{max-width:100%;max-height:62vh;display:block}
+#srcStage{cursor:crosshair}
+.dot{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #fff;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 0 3px rgba(0,0,0,.4)}
+.dot.p{background:var(--ok)}.dot.n{background:var(--bad)}
+.bar{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.bar input[type=range]{flex:1;min-width:120px;accent-color:var(--blue)}
+.hint{color:var(--mute);font-size:13px;margin-top:8px}
+#progress{display:none;margin-top:16px;gap:22px;align-items:center;flex-wrap:wrap}
+.ring{width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--blue) calc(var(--p)*1%),#17245a 0);display:grid;place-items:center}
+.ring b{width:76px;height:76px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-size:20px}
+#steps{list-style:none;margin:0;padding:0;font-size:14px;color:var(--mute)}
+#steps li::before{content:"○ ";color:var(--mute)}
+#steps li.done{color:var(--text)}#steps li.done::before{content:"✔ ";color:var(--ok)}
+#steps li.cur{color:#fff}#steps li.cur::before{content:"● ";color:var(--blue)}
+.pbar{height:8px;border-radius:8px;background:#17245a;margin-top:8px;width:260px;max-width:100%;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--violet));transition:width .4s}
+aside .card{margin-bottom:16px}
+aside h3{margin:0 0 12px;font-size:16px}
+.bgs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.bgs button{border:1px solid var(--line);background:transparent;border-radius:10px;padding:6px 2px;cursor:pointer;font-size:12px;color:var(--mute)}
+.bgs button.on{border-color:var(--blue);color:#fff;background:#0f2a66}
+.sw{height:34px;border-radius:7px;margin-bottom:5px}
+label{display:block;color:var(--mute);font-size:13px;margin:12px 0 5px}
+select,input[type=color]{width:100%;background:#091233;border:1px solid var(--line);border-radius:10px;padding:10px}
+input[type=color]{height:42px;padding:3px}
+#msg{margin-top:12px;font-size:14px;min-height:20px}.err{color:var(--bad)}.okc{color:var(--ok)}
+/* auth overlay */
+#auth{position:fixed;inset:0;background:rgba(3,7,22,.92);display:grid;place-items:center;z-index:50;padding:16px}
+#auth .card{width:380px;max-width:100%}
+#auth input{width:100%;background:#091233;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+#auth .btn{width:100%;margin-top:4px}
+.link{background:none;border:0;color:var(--blue);cursor:pointer;padding:0}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<!-- ======= CONFIG: yahan apni values daalo ======= -->
+<script>
+const CONFIG = {
+  SUPABASE_URL: "https://YOUR-PROJECT.supabase.co",
+  SUPABASE_ANON_KEY: "YOUR-SUPABASE-ANON-KEY",
+  API_BASE: "https://YOUR-HF-USERNAME-aniremove.hf.space", // Hugging Face Space URL (bina / ke)
+  MAX_MB: 200, MAX_SECONDS: 30
+};
+</script>
+
+<div id="auth">
+  <div class="card">
+    <div class="logo" style="margin-bottom:6px">ANI<span>REMOVE</span></div>
+    <p class="sub" id="authTitle">Sign in to remove backgrounds for free.</p>
+    <input id="email" type="email" placeholder="Email" autocomplete="email">
+    <input id="pass" type="password" placeholder="Password (min 6 characters)" autocomplete="current-password">
+    <button class="btn" id="authBtn">Sign in</button>
+    <button class="btn ghost" id="googleBtn" style="margin-top:8px">Continue with Google</button>
+    <p class="hint"><span id="authSwitchTxt">New here?</span> <button class="link" id="authSwitch">Create account</button></p>
+    <div id="authMsg" class="hint"></div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">ANI<span>REMOVE</span></div>
+  <div id="userbox" class="hidden"><span id="uemail"></span><button class="btn ghost" id="logout">Sign out</button></div>
+</header>
+
+<main>
+<section>
+  <h1>Remove background in seconds</h1>
+  <p class="sub">Upload, click on the person or object you want to keep, and download. Free, no watermark.</p>
+
+  <div class="modes" id="modes">
+    <button data-m="image">Image</button><button data-m="video" class="on">Video</button>
+  </div>
+
+  <div class="card">
+    <div id="drop">
+      <div style="font-size:44px">☁️</div>
+      <b id="dropTitle">Drag and drop your video</b>
+      <small>or click to browse</small>
+      <button class="btn" type="button" id="chooseBtn">Choose video</button>
+      <small id="dropInfo"></small>
+      <input id="file" type="file" class="hidden">
+    </div>
+
+    <div id="work">
+      <div class="tabs">
+        <button class="tab on" data-v="src">Original</button>
+        <button class="tab" data-v="out" id="tabOut" disabled>Background removed</button>
+        <span style="flex:1"></span>
+        <button class="btn ghost" id="clearPts">Clear points</button>
+        <button class="btn ghost" id="changeFile">Change file</button>
+      </div>
+      <div id="srcView">
+        <div class="stage" id="srcStage"></div>
+        <div class="bar" id="vbar">
+          <button class="btn ghost" id="play">Play</button>
+          <input type="range" id="seek" min="0" max="1000" value="0">
+          <span id="time" class="hint" style="margin:0">0:00</span>
+        </div>
+        <div class="hint" id="clickHint">Click on the main person or object to keep (green dot). Shift + click or right-click marks an area to remove (red dot).</div>
+      </div>
+      <div id="outView" class="hidden"><div class="stage checker" id="outStage"></div></div>
+    </div>
+  </div>
+
+  <div class="card" id="progress">
+    <div class="ring" id="ring" style="--p:0"><b id="pct">0%</b></div>
+    <div>
+      <b id="ptitle">Working...</b>
+      <div class="hint" style="margin:2px 0 0">Please keep this tab open.</div>
+      <div class="pbar"><i id="pfill"></i></div>
+    </div>
+    <ul id="steps"><li data-s="analyze">Analyzing video</li><li data-s="detect">Detecting subject</li><li data-s="remove">Removing background</li><li data-s="final">Finalizing output</li></ul>
+  </div>
+</section>
+
+<aside>
+  <div class="card">
+    <h3>Background</h3>
+    <div class="bgs" id="bgs">
+      <button data-b="transparent" class="on"><div class="sw" style="background:conic-gradient(#ccc 25%,#fff 0 50%,#ccc 0 75%,#fff 0) 0 0/10px 10px"></div>Transparent</button>
+      <button data-b="blur"><div class="sw" style="background:linear-gradient(135deg,#6b7a99,#c4cde0);filter:blur(1px)"></div>Blur</button>
+      <button data-b="color"><div class="sw" style="background:linear-gradient(135deg,#1e90ff,#8b5cf6)"></div>Color</button>
+      <button data-b="image"><div class="sw" style="background:linear-gradient(135deg,#2a6,#36c)"></div>Image</button>
+    </div>
+    <div id="colorBox" class="hidden"><label>Background color</label><input type="color" id="bgColor" value="#00b140"></div>
+    <div id="imageBox" class="hidden"><label>Background image</label><input type="file" id="bgFile" accept="image/*"></div>
+  </div>
+  <div class="card">
+    <h3>Output</h3>
+    <label>Resolution (max side)</label>
+    <select id="res"><option value="1280">720p (faster)</option><option value="1920" selected>1080p (Full HD)</option></select>
+    <p class="hint" id="fmtInfo">Format: WebM with transparency</p>
+    <button class="btn" id="go" style="width:100%;margin-top:8px">Remove background</button>
+    <button class="btn ghost hidden" id="dl" style="width:100%;margin-top:8px">Download</button>
+    <div id="msg"></div>
+  </div>
+</aside>
+</main>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+const S = {mode:"video", file:null, url:null, pts:[], t:0, bg:"transparent", busy:false, out:null, ext:null};
+
+/* ---------- auth ---------- */
+let signup = false;
+function authMsg(t, bad){ const m=$("#authMsg"); m.textContent=t; m.className="hint "+(bad?"err":"okc"); }
+$("#authSwitch").onclick = () => {
+  signup = !signup;
+  $("#authBtn").textContent = signup ? "Create account" : "Sign in";
+  $("#authSwitch").textContent = signup ? "Sign in" : "Create account";
+  $("#authSwitchTxt").textContent = signup ? "Already have an account?" : "New here?";
+};
+$("#authBtn").onclick = async () => {
+  const email=$("#email").value.trim(), password=$("#pass").value;
+  if(!email || password.length<6) return authMsg("Enter a valid email and a password with 6+ characters.", true);
+  $("#authBtn").disabled=true;
+  const {data,error} = signup ? await sb.auth.signUp({email,password}) : await sb.auth.signInWithPassword({email,password});
+  $("#authBtn").disabled=false;
+  if(error) return authMsg(error.message, true);
+  if(signup && !data.session) return authMsg("Check your email and confirm your account, then sign in.");
+};
+$("#googleBtn").onclick = async () => {
+  const {error} = await sb.auth.signInWithOAuth({provider:"google", options:{redirectTo:location.origin}});
+  if(error) authMsg(error.message, true);
+};
+$("#logout").onclick = () => sb.auth.signOut();
+sb.auth.onAuthStateChange((_e, session) => showAuth(session));
+sb.auth.getSession().then(({data}) => showAuth(data.session));
+function showAuth(session){
+  $("#auth").classList.toggle("hidden", !!session);
+  $("#userbox").classList.toggle("hidden", !session);
+  $("#uemail").textContent = session ? session.user.email : "";
+}
+async function token(){ const {data}=await sb.auth.getSession(); return data.session?.access_token; }
+
+/* ---------- mode / file ---------- */
+function setMode(m){
+  if(S.busy) return;
+  S.mode = m; resetFile();
+  $$("#modes button").forEach(b=>b.classList.toggle("on", b.dataset.m===m));
+  const v = m==="video";
+  $("#dropTitle").textContent = v ? "Drag and drop your video" : "Drag and drop your image";
+  $("#chooseBtn").textContent = v ? "Choose video" : "Choose image";
+  $("#file").accept = v ? "video/mp4,video/quicktime,video/x-msvideo,video/webm,.mp4,.mov,.avi,.webm" : "image/png,image/jpeg,image/webp";
+  $("#dropInfo").textContent = v ? `MP4, MOV, AVI, WEBM · max ${CONFIG.MAX_MB} MB · up to ${CONFIG.MAX_SECONDS} sec` : `PNG, JPG, WEBP · max ${CONFIG.MAX_MB} MB`;
+  $("#vbar").classList.toggle("hidden", !v);
+  $("#progress li[data-s=analyze], #steps li[data-s=analyze]").textContent = v ? "Analyzing video" : "Analyzing image";
+  $("#clickHint").textContent = v
+    ? "Pause on a clear frame, then click the main person or object to keep (green dot). Shift + click or right-click marks an area to remove (red dot)."
+    : "Optional: click the main person or object to keep. Without a click, the AI picks the main subject itself.";
+  updFmt();
+}
+$$("#modes button").forEach(b => b.onclick = () => setMode(b.dataset.m));
+
+function resetFile(){
+  if(S.url) URL.revokeObjectURL(S.url);
+  if(S.out) URL.revokeObjectURL(S.out);
+  Object.assign(S,{file:null,url:null,pts:[],t:0,out:null,ext:null});
+  $("#drop").classList.remove("hidden"); $("#work").style.display="none";
+  $("#srcStage").innerHTML=""; $("#outStage").innerHTML="";
+  $("#tabOut").disabled=true; $("#dl").classList.add("hidden"); $("#progress").style.display="none";
+  $("#file").value=""; msg("");
+}
+function msg(t,bad){ const m=$("#msg"); m.textContent=t; m.className=bad?"err":"okc"; }
+
+$("#drop").onclick = e => { if(e.target.id!=="chooseBtn") $("#file").click(); };
+$("#chooseBtn").onclick = () => $("#file").click();
+$("#changeFile").onclick = () => { if(!S.busy) resetFile(); };
+["dragover","dragenter"].forEach(ev=>$("#drop").addEventListener(ev,e=>{e.preventDefault();$("#drop").classList.add("over")}));
+["dragleave","drop"].forEach(ev=>$("#drop").addEventListener(ev,e=>{e.preventDefault();$("#drop").classList.remove("over")}));
+$("#drop").addEventListener("drop", e => { if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+$("#file").onchange = e => { if(e.target.files[0]) loadFile(e.target.files[0]); };
+
+function loadFile(f){
+  const isV = f.type.startsWith("video/") || /\.(mp4|mov|avi|webm)$/i.test(f.name);
+  const isI = f.type.startsWith("image/");
+  if(S.mode==="video" && !isV) return alert("Please choose a video file.");
+  if(S.mode==="image" && !isI) return alert("Please choose an image file.");
+  if(f.size > CONFIG.MAX_MB*1048576) return alert(`File is too large. Maximum ${CONFIG.MAX_MB} MB.`);
+  resetFile();
+  S.file=f; S.url=URL.createObjectURL(f);
+  const el = document.createElement(S.mode==="video" ? "video" : "img");
+  el.id="media"; el.src=S.url; el.draggable=false;
+  if(S.mode==="video"){ el.muted=true; el.playsInline=true; el.preload="auto"; wireVideo(el); }
+  el.onloadedmetadata = el.onload = () => { if(S.mode==="video" && el.duration>CONFIG.MAX_SECONDS){ alert(`Video is longer than ${CONFIG.MAX_SECONDS} seconds. Please trim it.`); resetFile(); return; } draw(); };
+  el.onerror = () => { alert("This file could not be opened in the browser. Try MP4 (H.264) or another file."); resetFile(); };
+  $("#srcStage").appendChild(el);
+  $("#drop").classList.add("hidden"); $("#work").style.display="block";
+  showView("src");
+}
+
+/* ---------- video controls ---------- */
+const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+function wireVideo(v){
+  v.ontimeupdate = () => { $("#seek").value = v.duration ? v.currentTime/v.duration*1000 : 0; $("#time").textContent = `${fmt(v.currentTime)} / ${fmt(v.duration||0)}`; draw(); };
+  v.onplay = () => $("#play").textContent="Pause"; v.onpause = () => $("#play").textContent="Play";
+}
+$("#play").onclick = () => { const v=$("#media"); if(v) v.paused ? v.play() : v.pause(); };
+$("#seek").oninput = e => { const v=$("#media"); if(v&&v.duration){ v.pause(); v.currentTime = e.target.value/1000*v.duration; } };
+
+/* ---------- click to select ---------- */
+function box(){
+  const el=$("#media"), r=el.getBoundingClientRect(), st=$("#srcStage").getBoundingClientRect();
+  return {x:r.left-st.left, y:r.top-st.top, w:r.width, h:r.height, L:r.left, T:r.top};
+}
+function addPoint(e, neg){
+  e.preventDefault();
+  const el=$("#media"); if(!el||S.busy) return;
+  const b=box(), nx=(e.clientX-b.L)/b.w, ny=(e.clientY-b.T)/b.h;
+  if(nx<0||nx>1||ny<0||ny>1) return;
+  if(S.mode==="video"){
+    el.pause();
+    if(S.pts.length && Math.abs(el.currentTime-S.t)>0.05){ S.pts=[]; }
+    S.t = el.currentTime;
+  }
+  S.pts.push([nx,ny,neg?0:1]); draw();
+}
+$("#srcStage").addEventListener("click", e => { if(e.target.id==="media") addPoint(e, e.shiftKey); });
+$("#srcStage").addEventListener("contextmenu", e => { if(e.target.id==="media") addPoint(e, true); });
+$("#clearPts").onclick = () => { S.pts=[]; draw(); };
+window.addEventListener("resize", () => draw());
+function draw(){
+  $$(".dot").forEach(d=>d.remove());
+  const el=$("#media"); if(!el) return;
+  if(S.mode==="video" && S.pts.length && Math.abs(el.currentTime-S.t)>0.2) return;
+  const b=box();
+  S.pts.forEach(p=>{ const d=document.createElement("div"); d.className="dot "+(p[2]?"p":"n");
+    d.style.left=(b.x+p[0]*b.w)+"px"; d.style.top=(b.y+p[1]*b.h)+"px"; $("#srcStage").appendChild(d); });
+}
+
+/* ---------- tabs ---------- */
+function showView(v){
+  $$(".tab[data-v]").forEach(t=>t.classList.toggle("on", t.dataset.v===v));
+  $("#srcView").classList.toggle("hidden", v!=="src"); $("#outView").classList.toggle("hidden", v!=="out");
+  if(v==="src") draw();
+}
+$$(".tab[data-v]").forEach(t=>t.onclick=()=>{ if(!t.disabled) showView(t.dataset.v); });
+
+/* ---------- settings ---------- */
+$$("#bgs button").forEach(b=>b.onclick=()=>{
+  S.bg=b.dataset.b; $$("#bgs button").forEach(x=>x.classList.toggle("on",x===b));
+  $("#colorBox").classList.toggle("hidden",S.bg!=="color"); $("#imageBox").classList.toggle("hidden",S.bg!=="image"); updFmt();
+});
+function updFmt(){
+  $("#fmtInfo").textContent = S.mode==="image" ? "Format: PNG" : (S.bg==="transparent" ? "Format: WebM with transparency (works in Chrome, Edge, Firefox, After Effects, DaVinci)" : "Format: MP4 (H.264)");
+}
+
+/* ---------- process ---------- */
+function setSteps(stage){
+  const order=["analyze","detect","remove","final"], i=order.indexOf(stage);
+  $$("#steps li").forEach((li,k)=>{ li.className = k<i ? "done" : k===i ? "cur" : ""; });
+}
+function setPct(p, title){ $("#ring").style.setProperty("--p",p); $("#pct").textContent=p+"%"; $("#pfill").style.width=p+"%"; if(title) $("#ptitle").textContent=title; }
+
+$("#go").onclick = async () => {
+  if(S.busy) return;
+  if(!S.file) return msg("Choose a file first.", true);
+  if(S.mode==="video" && !S.pts.some(p=>p[2]===1)) return msg("Click on the person or object you want to keep.", true);
+  if(S.bg==="image" && !$("#bgFile").files[0]) return msg("Choose a background image.", true);
+  const tk = await token(); if(!tk) return msg("Please sign in again.", true);
+  S.busy=true; msg(""); $("#go").disabled=true; $("#dl").classList.add("hidden"); $("#tabOut").disabled=true;
+  $("#progress").style.display="flex"; setSteps("analyze"); setPct(0,"Uploading...");
+  try{
+    const fd=new FormData();
+    fd.append("file",S.file); fd.append("kind",S.mode); fd.append("points",JSON.stringify(S.pts));
+    fd.append("t",S.t); fd.append("bg",S.bg); fd.append("color",$("#bgColor").value); fd.append("res",$("#res").value);
+    if(S.bg==="image") fd.append("bg_image",$("#bgFile").files[0]);
+    const job = await upload(fd, tk);
+    S.job = job.job_id;
+    await poll(job.job_id);
+    await fetchResult(job.job_id);
+  }catch(e){ msg(e.message||"Something went wrong. Please try again.", true); $("#progress").style.display="none"; }
+  S.busy=false; $("#go").disabled=false;
+};
+
+function upload(fd, tk){
+  return new Promise((res,rej)=>{
+    const x=new XMLHttpRequest(); x.open("POST", CONFIG.API_BASE+"/api/process");
+    x.setRequestHeader("Authorization","Bearer "+tk);
+    x.upload.onprogress = e => { if(e.lengthComputable) setPct(Math.round(e.loaded/e.total*100),"Uploading..."); };
+    x.onload = () => { let j={}; try{j=JSON.parse(x.responseText)}catch{}
+      x.status===200 ? res(j) : rej(new Error(j.detail || `Upload failed (${x.status})`)); };
+    x.onerror = () => rej(new Error("Cannot reach the server. Check your internet or try again in a minute (server may be waking up)."));
+    x.timeout = 600000; x.ontimeout = () => rej(new Error("Upload timed out."));
+    x.send(fd);
+  });
+}
+async function poll(id){
+  setPct(0,"Waiting in queue...");
+  let fails=0;
+  for(;;){
+    await new Promise(r=>setTimeout(r,1200));
+    let j; try{
+      const r=await fetch(`${CONFIG.API_BASE}/api/jobs/${id}`,{headers:{Authorization:"Bearer "+await token()}});
+      if(!r.ok) throw new Error((await r.json()).detail||"status error"); j=await r.json(); fails=0;
+    }catch(e){ if(++fails>8) throw new Error("Lost connection to the server."); continue; }
+    if(j.status==="error") throw new Error(j.error||"Processing failed.");
+    setSteps(j.stage); setPct(j.pct||0, j.status==="queued" ? "Waiting in queue..." : "AI is removing the background...");
+    if(j.status==="done"){ S.ext=j.ext; return; }
+  }
+}
+async function fetchResult(id){
+  setPct(100,"Preparing download...");
+  const r=await fetch(`${CONFIG.API_BASE}/api/jobs/${id}/result`,{headers:{Authorization:"Bearer "+await token()}});
+  if(!r.ok) throw new Error("Could not download the result.");
+  const blob=await r.blob(); if(S.out) URL.revokeObjectURL(S.out); S.out=URL.createObjectURL(blob);
+  const el=document.createElement(S.mode==="video"?"video":"img"); el.src=S.out;
+  if(S.mode==="video"){ el.controls=true; el.loop=true; el.autoplay=true; el.muted=true; el.playsInline=true; }
+  $("#outStage").innerHTML=""; $("#outStage").classList.toggle("checker", S.bg==="transparent"); $("#outStage").appendChild(el);
+  $("#tabOut").disabled=false; showView("out");
+  $("#dl").classList.remove("hidden"); setSteps("done"); $("#progress").style.display="none";
+  msg("Done! Your file is ready.");
+}
+$("#dl").onclick = () => {
+  if(!S.out) return;
+  const a=document.createElement("a"); a.href=S.out;
+  a.download="aniremove_"+(S.file.name.replace(/\.[^.]+$/,"")||"result")+"."+S.ext;
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+setMode("video");
+</script>
+</body>
+</html>
