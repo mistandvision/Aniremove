@@ -1,23 +1,30 @@
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   const { imageBase64 } = req.body;
   if (!imageBase64) {
-    return res.status(400).json({ error: 'No media data provided' });
+    return res.status(400).json({ error: 'Image data missing' });
   }
 
   const token = process.env.HF_TOKEN;
   if (!token) {
-    return res.status(500).json({ error: 'HF_TOKEN is missing in Vercel settings' });
+    return res.status(500).json({ error: 'HF_TOKEN not configured on Vercel' });
   }
 
   try {
     const buffer = Buffer.from(imageBase64, 'base64');
 
-    // Hugging Face RMBG State-of-the-art model
-    const response = await fetch(
+    const hfResponse = await fetch(
       "https://api-inference.huggingface.co/models/briaai/RMBG-1.4",
       {
         headers: {
@@ -29,12 +36,12 @@ export default async function handler(req, res) {
       }
     );
 
-    if (!response.ok) {
-      const err = await response.text();
-      return res.status(response.status).json({ error: err });
+    if (!hfResponse.ok) {
+      const err = await hfResponse.text();
+      return res.status(hfResponse.status).json({ error: err });
     }
 
-    const outputBuffer = await response.arrayBuffer();
+    const outputBuffer = await hfResponse.arrayBuffer();
     res.setHeader("Content-Type", "image/png");
     return res.send(Buffer.from(outputBuffer));
   } catch (error) {
